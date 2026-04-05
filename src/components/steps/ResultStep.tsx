@@ -195,11 +195,19 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
             exit={{ opacity: 0, height: 0, marginTop: -16 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
           >
-            {infoLines.map((line, i) => (
-              <p key={i} className="font-body text-xs text-[#1A1A2E]/60 font-mono whitespace-pre-wrap break-words">
-                {line}
-              </p>
-            ))}
+            {infoLines.map((line, i) => {
+              const colon = line.indexOf(':')
+              return (
+                <p key={i} className="font-body text-xs text-[#1A1A2E]/60 font-mono whitespace-pre-wrap break-words">
+                  {colon > -1 ? (
+                    <>
+                      <span className="font-bold md:font-normal">{line.slice(0, colon + 1)}</span>
+                      {line.slice(colon + 1)}
+                    </>
+                  ) : line}
+                </p>
+              )
+            })}
           </motion.div>
         )}
       </AnimatePresence>
