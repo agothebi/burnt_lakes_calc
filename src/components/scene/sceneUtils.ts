@@ -57,6 +57,11 @@ export const STOPS = {
     { at: 0.75, color: [185, 55, 20]   as RGB },  // red dwarf
     { at: 1,    color: [80, 18, 8]     as RGB },  // dark ember
   ],
+  mountainVeryFar: [
+    { at: 0,    color: [118, 158, 148] as RGB },  // misty blue-green (atmospheric haze)
+    { at: 0.4,  color: [108, 108, 90]  as RGB },  // dusty mid
+    { at: 1,    color: [65, 58, 52]    as RGB },  // dim ash
+  ],
   mountainFar: [
     { at: 0,    color: [88, 128, 74]   as RGB },  // muted sage green
     { at: 0.5,  color: [98, 90, 68]    as RGB },  // dusty khaki

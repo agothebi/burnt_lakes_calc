@@ -17,7 +17,8 @@ import {
 } from './sceneUtils'
 
 interface LakeSceneProps {
-  progress: number  // 0–1 from useBurnProgress
+  progress: number   // 0–1 from useBurnProgress
+  compact?: boolean  // true on mobile: crops to mountains+lake, hides sky/sun
 }
 
 // Tree definition: position + size
@@ -54,36 +55,47 @@ const SPRING_COLOR   = { type: 'spring' as const, stiffness: 38, damping: 24 }
 const SPRING_POS     = { type: 'spring' as const, stiffness: 28, damping: 22 }
 const SPRING_OPACITY = { type: 'spring' as const, stiffness: 42, damping: 26 }
 
-export function LakeScene({ progress }: LakeSceneProps) {
+/**
+ * compact viewBox: Y=200 to Y=460 in original coordinates (mountains + lake, no sky/sun).
+ * At 390px wide container (h-52, 208px tall):
+ *   scale = 390/400 = 0.975 → rendered 253.5px tall → centered: shows SVG Y≈228–441
+ *   Far mountain peaks (~218) just visible at top, trees, water surface range, lakebed.
+ */
+const VIEWBOX_FULL    = '0 0 400 650'
+const VIEWBOX_COMPACT = '0 200 400 260'
+
+export function LakeScene({ progress, compact = false }: LakeSceneProps) {
   // ── Mouse parallax ──────────────────────────────────────────────────────────
   const rawX = useMotionValue(0)
   const rawY = useMotionValue(0)
   const smoothX = useSpring(rawX, { stiffness: 55, damping: 22 })
   const smoothY = useSpring(rawY, { stiffness: 55, damping: 22 })
 
-  // Per-layer transforms (called unconditionally per React rules)
-  const cloudsX    = useTransform(smoothX, v => v * 7)
-  const cloudsY    = useTransform(smoothY, v => v * 2)
-  const mtnFarX    = useTransform(smoothX, v => v * 11)
-  const mtnFarY    = useTransform(smoothY, v => v * 4)
-  const mtnNearX   = useTransform(smoothX, v => v * 15)
-  const mtnNearY   = useTransform(smoothY, v => v * 5)
-  const treeFarX   = useTransform(smoothX, v => v * 18)
-  const treeFarY   = useTransform(smoothY, v => v * 6)
-  const treeNearX  = useTransform(smoothX, v => v * 24)
-  const treeNearY  = useTransform(smoothY, v => v * 8)
-  const waterX     = useTransform(smoothX, v => v * 9)
-  const waterY_mv  = useTransform(smoothY, v => v * 3)
-  const reedsX     = useTransform(smoothX, v => v * 30)
-  const reedsY     = useTransform(smoothY, v => v * 10)
-  const shoreX     = useTransform(smoothX, v => v * 34)
-  const shoreY_mv  = useTransform(smoothY, v => v * 12)
-  const fgX        = useTransform(smoothX, v => v * 40)
-  const fgY        = useTransform(smoothY, v => v * 15)
-  const embersX    = useTransform(smoothX, v => v * 44)
-  const embersY    = useTransform(smoothY, v => v * 17)
-  const sunX_prlx  = useTransform(smoothX, v => v * 4)
-  const sunY_prlx  = useTransform(smoothY, v => v * 3)
+  // Per-layer transforms (all at top level — React hooks rules)
+  const cloudsX      = useTransform(smoothX, v => v * 7)
+  const cloudsY      = useTransform(smoothY, v => v * 2)
+  const mtnVeryFarX  = useTransform(smoothX, v => v * 8)
+  const mtnVeryFarY  = useTransform(smoothY, v => v * 3)
+  const mtnFarX      = useTransform(smoothX, v => v * 11)
+  const mtnFarY      = useTransform(smoothY, v => v * 4)
+  const mtnNearX     = useTransform(smoothX, v => v * 15)
+  const mtnNearY     = useTransform(smoothY, v => v * 5)
+  const treeFarX     = useTransform(smoothX, v => v * 18)
+  const treeFarY     = useTransform(smoothY, v => v * 6)
+  const treeNearX    = useTransform(smoothX, v => v * 24)
+  const treeNearY    = useTransform(smoothY, v => v * 8)
+  const waterX       = useTransform(smoothX, v => v * 9)
+  const waterY_mv    = useTransform(smoothY, v => v * 3)
+  const reedsX       = useTransform(smoothX, v => v * 30)
+  const reedsY       = useTransform(smoothY, v => v * 10)
+  const shoreX       = useTransform(smoothX, v => v * 34)
+  const shoreY_mv    = useTransform(smoothY, v => v * 12)
+  const fgX          = useTransform(smoothX, v => v * 40)
+  const fgY          = useTransform(smoothY, v => v * 15)
+  const embersX      = useTransform(smoothX, v => v * 44)
+  const embersY      = useTransform(smoothY, v => v * 17)
+  const sunX_prlx    = useTransform(smoothX, v => v * 4)
+  const sunY_prlx    = useTransform(smoothY, v => v * 3)
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -97,21 +109,22 @@ export function LakeScene({ progress }: LakeSceneProps) {
   }, [rawX, rawY])
 
   // ── Derived colors ──────────────────────────────────────────────────────────
-  const skyTopColor   = interpolateStops(STOPS.skyTop,      progress)
-  const skyBotColor   = interpolateStops(STOPS.skyBot,      progress)
-  const sunColor      = interpolateStops(STOPS.sun,         progress)
-  const mtnFarColor   = interpolateStops(STOPS.mountainFar, progress)
-  const mtnNearColor  = interpolateStops(STOPS.mountainNear,progress)
-  const treeFarColor  = interpolateStops(STOPS.treeFar,     progress)
-  const treeNearColor = interpolateStops(STOPS.treeNear,    progress)
-  const trunkColor    = interpolateStops(STOPS.treeTrunk,   progress)
-  const waterColor    = interpolateStops(STOPS.water,       progress)
-  const shimmerColor  = interpolateStops(STOPS.waterShimmer,progress)
-  const lakebedColor  = interpolateStops(STOPS.lakebed,     progress)
-  const reedColor     = interpolateStops(STOPS.reed,        progress)
-  const shoreColor    = interpolateStops(STOPS.shore,       progress)
-  const fgColor       = interpolateStops(STOPS.foreground,  progress)
-  const emberColor    = interpolateStops(STOPS.ember,       progress)
+  const skyTopColor      = interpolateStops(STOPS.skyTop,         progress)
+  const skyBotColor      = interpolateStops(STOPS.skyBot,         progress)
+  const sunColor         = interpolateStops(STOPS.sun,            progress)
+  const mtnVeryFarColor  = interpolateStops(STOPS.mountainVeryFar,progress)
+  const mtnFarColor      = interpolateStops(STOPS.mountainFar,    progress)
+  const mtnNearColor     = interpolateStops(STOPS.mountainNear,   progress)
+  const treeFarColor     = interpolateStops(STOPS.treeFar,        progress)
+  const treeNearColor    = interpolateStops(STOPS.treeNear,       progress)
+  const trunkColor       = interpolateStops(STOPS.treeTrunk,      progress)
+  const waterColor       = interpolateStops(STOPS.water,          progress)
+  const shimmerColor     = interpolateStops(STOPS.waterShimmer,   progress)
+  const lakebedColor     = interpolateStops(STOPS.lakebed,        progress)
+  const reedColor        = interpolateStops(STOPS.reed,           progress)
+  const shoreColor       = interpolateStops(STOPS.shore,          progress)
+  const fgColor          = interpolateStops(STOPS.foreground,     progress)
+  const emberColor       = interpolateStops(STOPS.ember,          progress)
 
   // ── Derived scalars ─────────────────────────────────────────────────────────
   const waterY   = waterSurfaceY(progress)
@@ -121,6 +134,11 @@ export function LakeScene({ progress }: LakeSceneProps) {
   const reedSY   = reedScaleY(progress)
   const shimmer  = shimmerOpacity(progress)
 
+  // Snow caps: fully visible at 0, fade out by progress=0.25
+  const snowOpacity = Math.max(0, 1 - progress * 4)
+  // Atmospheric haze band between sky and mountains: fades with burn
+  const hazeOpacity = Math.max(0, 1 - progress * 2.5) * 0.14
+
   return (
     <div
       className="w-full h-full relative overflow-hidden"
@@ -128,46 +146,39 @@ export function LakeScene({ progress }: LakeSceneProps) {
       onMouseLeave={handleMouseLeave}
     >
       <svg
-        viewBox="0 0 400 650"
+        viewBox={compact ? VIEWBOX_COMPACT : VIEWBOX_FULL}
         className="w-full h-full"
         preserveAspectRatio="xMidYMid slice"
         style={{ display: 'block' }}
       >
-        <defs>
-          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={skyTopColor} />
-            <stop offset="100%" stopColor={skyBotColor} />
-          </linearGradient>
-          <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,255,200,0.35)" />
-            <stop offset="100%" stopColor="rgba(255,200,100,0)" />
-          </radialGradient>
-        </defs>
-
-        {/* ── Sky ───────────────────────────────────────────────────────── */}
-        <motion.rect
-          x="-10" y="-10" width="420" height="670"
-          fill="url(#skyGrad)"
-          animate={{ fill: 'url(#skyGrad)' }}
-        />
-        {/* Re-draw gradient stops reactively */}
+        {/* ── Gradient defs (redeclared each render for reactive animation) ── */}
         <defs>
           <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"   stopColor={skyTopColor} />
             <stop offset="100%" stopColor={skyBotColor} />
           </linearGradient>
+          <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="rgba(255,255,200,0.35)" />
+            <stop offset="100%" stopColor="rgba(255,200,100,0)" />
+          </radialGradient>
+          {/* Water reflection gradient — tree color at surface fading into water */}
+          <linearGradient id="reflGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={treeNearColor} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={waterColor}    stopOpacity="0" />
+          </linearGradient>
         </defs>
+
+        {/* ── Sky ───────────────────────────────────────────────────────── */}
+        <rect x="-10" y="-10" width="420" height="670" fill="url(#skyGrad)" />
 
         {/* ── Sun ───────────────────────────────────────────────────────── */}
         <motion.g style={{ x: sunX_prlx, y: sunY_prlx }}>
-          {/* Glow halo */}
           <motion.circle
-            cx={305} cy={sunY} r={58}
+            cx={305} cy={sunY} r={72}
             fill="url(#sunGlow)"
             animate={{ cy: sunY, opacity: Math.max(0, 1 - progress * 1.8) }}
             transition={SPRING_POS}
           />
-          {/* Sun disc */}
           <motion.circle
             cx={305} cy={sunY} r={32}
             animate={{ fill: sunColor, cy: sunY }}
@@ -178,20 +189,39 @@ export function LakeScene({ progress }: LakeSceneProps) {
         {/* ── Clouds ────────────────────────────────────────────────────── */}
         <motion.g style={{ x: cloudsX, y: cloudsY }}>
           <motion.g animate={{ opacity: clouds }} transition={SPRING_OPACITY}>
-            {/* Cloud 1 */}
             <circle cx={72}  cy={108} r={22} fill="rgba(255,255,255,0.88)" />
             <circle cx={98}  cy={98}  r={30} fill="rgba(255,255,255,0.92)" />
             <circle cx={124} cy={105} r={20} fill="rgba(255,255,255,0.88)" />
-            {/* Cloud 2 */}
             <circle cx={228} cy={72}  r={18} fill="rgba(255,255,255,0.82)" />
             <circle cx={252} cy={62}  r={26} fill="rgba(255,255,255,0.86)" />
             <circle cx={275} cy={69}  r={18} fill="rgba(255,255,255,0.82)" />
-            {/* Cloud 3 (small) */}
             <circle cx={158} cy={52}  r={12} fill="rgba(255,255,255,0.70)" />
             <circle cx={174} cy={46}  r={16} fill="rgba(255,255,255,0.74)" />
             <circle cx={190} cy={52}  r={12} fill="rgba(255,255,255,0.70)" />
           </motion.g>
         </motion.g>
+
+        {/* ── Very far mountains (hazy, most distant layer) ─────────────── */}
+        <motion.g style={{ x: mtnVeryFarX, y: mtnVeryFarY }}>
+          <motion.path
+            d="M-20,345 C25,218 85,235 160,205 C228,178 300,192 380,182 C408,178 428,180 450,178 L450,360 L-20,360 Z"
+            animate={{ fill: mtnVeryFarColor }}
+            transition={SPRING_COLOR}
+            opacity={0.72}
+          />
+          {/* Snow caps on very far peaks (vanish as scene burns) */}
+          <motion.g animate={{ opacity: snowOpacity }} transition={SPRING_OPACITY}>
+            <polygon points="160,205 170,222 150,222" fill="rgba(240,248,255,0.82)" />
+            <polygon points="300,192 308,207 292,207" fill="rgba(240,248,255,0.78)" />
+          </motion.g>
+        </motion.g>
+
+        {/* ── Atmospheric haze band (depth separator) ───────────────────── */}
+        <rect
+          x="-10" y={240} width="420" height="55"
+          fill={skyBotColor}
+          opacity={hazeOpacity}
+        />
 
         {/* ── Far mountains ─────────────────────────────────────────────── */}
         <motion.g style={{ x: mtnFarX, y: mtnFarY }}>
@@ -200,6 +230,11 @@ export function LakeScene({ progress }: LakeSceneProps) {
             animate={{ fill: mtnFarColor }}
             transition={SPRING_COLOR}
           />
+          {/* Snow on far mountain peaks */}
+          <motion.g animate={{ opacity: snowOpacity }} transition={SPRING_OPACITY}>
+            <polygon points="175,218 188,235 162,235" fill="rgba(240,248,255,0.85)" />
+            <polygon points="310,204 320,218 300,218" fill="rgba(240,248,255,0.80)" />
+          </motion.g>
         </motion.g>
 
         {/* ── Near mountains ────────────────────────────────────────────── */}
@@ -281,7 +316,7 @@ export function LakeScene({ progress }: LakeSceneProps) {
             animate={{ fill: lakebedColor }}
             transition={SPRING_COLOR}
           />
-          {/* Cracked earth lines (appear when progress > 0.5) */}
+          {/* Cracked earth lines */}
           <motion.g animate={{ opacity: Math.max(0, (progress - 0.5) * 3) }} transition={SPRING_OPACITY}>
             <line x1="60"  y1="390" x2="95"  y2="412" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" strokeLinecap="round" />
             <line x1="140" y1="405" x2="168" y2="388" stroke="rgba(0,0,0,0.15)" strokeWidth="1.2" strokeLinecap="round" />
@@ -289,27 +324,38 @@ export function LakeScene({ progress }: LakeSceneProps) {
             <line x1="300" y1="408" x2="330" y2="392" stroke="rgba(0,0,0,0.14)" strokeWidth="1.2" strokeLinecap="round" />
           </motion.g>
 
-          {/* Lake water surface */}
+          {/* Water surface */}
           <motion.rect
             x="-20" y={0} width="440" height="650"
             animate={{ fill: waterColor, y: waterY }}
             transition={{ ...SPRING_COLOR, y: SPRING_POS }}
           />
 
-          {/* Shimmer lines on water surface */}
+          {/* Water reflection of treeline (gradient fading down from surface) */}
+          <motion.rect
+            x="-20" y={waterY} width="440" height="85"
+            fill="url(#reflGrad)"
+            animate={{ y: waterY }}
+            transition={SPRING_POS}
+          />
+
+          {/* Shimmer / perspective lines on water surface */}
           <motion.g animate={{ opacity: shimmer }} transition={SPRING_OPACITY}>
-            {[0, 1, 2].map(i => (
+            {/* Lines get wider + spaced further apart toward viewer (perspective) */}
+            {[0, 1, 2, 3].map(i => (
               <motion.line
                 key={i}
-                x1={50 + i * 90}  y1={waterY + 18 + i * 14}
-                x2={120 + i * 90} y2={waterY + 18 + i * 14}
+                x1={30 + i * 20}        y1={waterY + 12 + i * 16}
+                x2={370 - i * 20}       y2={waterY + 12 + i * 16}
                 animate={{
                   stroke: shimmerColor,
-                  y1: waterY + 18 + i * 14,
-                  y2: waterY + 18 + i * 14,
+                  y1: waterY + 12 + i * 16,
+                  y2: waterY + 12 + i * 16,
                 }}
                 transition={{ ...SPRING_COLOR, y1: SPRING_POS, y2: SPRING_POS }}
-                strokeWidth={2.5} strokeLinecap="round"
+                strokeWidth={1 + i * 0.7}
+                strokeLinecap="round"
+                opacity={0.6 + i * 0.1}
               />
             ))}
           </motion.g>
@@ -336,7 +382,6 @@ export function LakeScene({ progress }: LakeSceneProps) {
                   strokeLinecap="round"
                   fill="none"
                 />
-                {/* Reed head (oval) */}
                 <motion.ellipse
                   cx={rx + sway} cy={reedTip - 6} rx={4} ry={8}
                   animate={{ fill: reedColor }}
@@ -354,7 +399,6 @@ export function LakeScene({ progress }: LakeSceneProps) {
             animate={{ fill: shoreColor }}
             transition={SPRING_COLOR}
           />
-          {/* Shore pebbles */}
           {[35, 90, 155, 218, 280, 340, 390].map((px, i) => (
             <motion.ellipse
               key={i}
@@ -368,13 +412,11 @@ export function LakeScene({ progress }: LakeSceneProps) {
 
         {/* ── Foreground (grass + earth) ────────────────────────────────── */}
         <motion.g style={{ x: fgX, y: fgY }}>
-          {/* Main foreground band */}
           <motion.path
             d="M-20,530 C30,518 80,526 140,520 C200,514 260,524 320,518 C360,514 400,520 440,516 L440,660 L-20,660 Z"
             animate={{ fill: fgColor }}
             transition={SPRING_COLOR}
           />
-          {/* Foreground rocks */}
           {[
             { cx: 45,  cy: 555, rx: 32, ry: 16 },
             { cx: 178, cy: 548, rx: 28, ry: 14 },
@@ -388,7 +430,6 @@ export function LakeScene({ progress }: LakeSceneProps) {
               transition={SPRING_COLOR}
             />
           ))}
-          {/* Grass tufts */}
           {[22, 68, 115, 195, 245, 308, 358, 415].map((gx, i) => (
             <motion.g key={i}>
               <motion.line

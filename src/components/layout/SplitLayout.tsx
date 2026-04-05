@@ -11,15 +11,12 @@ interface SplitLayoutProps {
  * Full-viewport split layout — never causes page-level scroll.
  *
  * Desktop (md+): 40/60 side-by-side. Lake left, questions right.
+ *   Lake takes the full viewport height.
  *
  * Mobile (<md):
- * - Questions on top (flex-1), lake strip fixed at h-52 (208px) on bottom.
- * - On `loading` and `results` steps, the lake is hidden entirely so
- *   those screens get the full viewport to breathe.
- *
- * h-52 (208px) at 390px container width shows SVG Y=213–426 via
- * xMidYMid slice: mountain peaks + full treeline + water surface range —
- * the most visually interesting panoramic slice.
+ * - Questions top (flex-1), lake strip fixed h-52 (208px) at bottom.
+ * - On `loading` and `results` steps the lake strip is hidden entirely
+ *   so those screens get the full viewport.
  */
 export function SplitLayout({ left, right, step }: SplitLayoutProps) {
   const mobileHideLake = step === 'results' || step === 'loading'
@@ -42,9 +39,10 @@ export function SplitLayout({ left, right, step }: SplitLayoutProps) {
       </div>
 
       {/* Lake panel — bottom on mobile, left on desktop */}
+      {/* IMPORTANT: h-52 is mobile-only; md:h-full overrides it for desktop */}
       <div className={`
         order-2 md:order-1
-        md:block md:flex-none md:w-[40%]
+        md:block md:flex-none md:w-[40%] md:h-full
         min-h-0 overflow-hidden
         ${mobileHideLake ? 'hidden' : 'h-52 flex-none'}
       `}>

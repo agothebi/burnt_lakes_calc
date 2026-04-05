@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SplitLayout } from './components/layout/SplitLayout'
 import { LakeScene } from './components/scene/LakeScene'
@@ -10,6 +11,19 @@ import { LoadingStep } from './components/steps/LoadingStep'
 import { ResultStep } from './components/steps/ResultStep'
 import { useWizard } from './hooks/useWizard'
 import { useBurnProgress } from './hooks/useBurnProgress'
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)')
+    const update = (e: MediaQueryListEvent) => setMobile(e.matches)
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+  return mobile
+}
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? '6%' : '-6%', opacity: 0 }),
@@ -32,13 +46,14 @@ function renderStep(wizard: ReturnType<typeof useWizard>) {
 }
 
 function App() {
-  const wizard      = useWizard()
+  const wizard       = useWizard()
   const burnProgress = useBurnProgress(wizard.answers)
+  const isMobile     = useIsMobile()
 
   return (
     <SplitLayout
       step={wizard.step}
-      left={<LakeScene progress={burnProgress} />}
+      left={<LakeScene progress={burnProgress} compact={isMobile} />}
       right={
         <div className="max-w-xl w-full mx-auto">
           <AnimatePresence mode="wait" custom={wizard.direction}>
