@@ -4,9 +4,9 @@ import {
   calculatePowerUserTokens,
   calculatePowerUserCalls,
   formatResult,
-  selectLakeUnit,
   outputRatioMultiplier,
   toolMultiplier,
+  LITERS_PER_LAKE,
   MODEL_MULTIPLIER,
   FREQUENCY_MULTIPLIER,
   MESSAGES_PER_SESSION,
@@ -46,6 +46,10 @@ describe('constants sanity checks', () => {
     expect(ML_PER_1K_TOKENS.frontier).toBeGreaterThan(ML_PER_1K_TOKENS.mid)
     expect(ML_PER_1K_TOKENS.mid).toBeGreaterThan(ML_PER_1K_TOKENS.small)
   })
+
+  it('LITERS_PER_LAKE is a positive number', () => {
+    expect(LITERS_PER_LAKE).toBeGreaterThan(0)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -78,12 +82,12 @@ describe('outputRatioMultiplier', () => {
 // ---------------------------------------------------------------------------
 
 describe('toolMultiplier', () => {
-  it('returns 1.0 when no image AI tools', () => {
+  it('returns 1.0 when no image generation tools', () => {
     expect(toolMultiplier(['chatgpt', 'claude'])).toBe(1.0)
   })
 
-  it('returns 1.6 when image AI is included', () => {
-    expect(toolMultiplier(['chatgpt', 'image-ai'])).toBe(1.6)
+  it('returns 1.6 when image generation is included', () => {
+    expect(toolMultiplier(['chatgpt', 'image-gen'])).toBe(1.6)
   })
 
   it('handles empty tools array', () => {
@@ -122,9 +126,9 @@ describe('calculateRegularUser', () => {
     expect(sixMonths).toBeCloseTo(oneMonth * 6, 5)
   })
 
-  it('image AI tools increase total vs no image AI', () => {
+  it('image generation tools increase total vs no image generation', () => {
     const withoutImg = calculateRegularUser({ ...baseInput, tools: ['chatgpt'] })
-    const withImg = calculateRegularUser({ ...baseInput, tools: ['chatgpt', 'image-ai'] })
+    const withImg = calculateRegularUser({ ...baseInput, tools: ['chatgpt', 'image-gen'] })
     expect(withImg).toBeGreaterThan(withoutImg)
   })
 
@@ -159,7 +163,7 @@ describe('calculateRegularUser', () => {
 
   it('heavy user 2 years produces dramatic result', () => {
     const result = calculateRegularUser({
-      tools: ['chatgpt', 'image-ai'],
+      tools: ['chatgpt', 'image-gen'],
       frequencyPerWeek: 'daily',
       sessionLength: 'over2h',
       conversationStyle: 'debate',
@@ -280,37 +284,6 @@ describe('calculatePowerUserCalls', () => {
 })
 
 // ---------------------------------------------------------------------------
-// selectLakeUnit
-// ---------------------------------------------------------------------------
-
-describe('selectLakeUnit', () => {
-  it('tiny amounts map to bathtubs', () => {
-    expect(selectLakeUnit(25).singular).toBe('bathtub')
-  })
-
-  it('moderate amounts map to backyard pools or Olympic pools', () => {
-    const unit = selectLakeUnit(50_000)
-    expect(['backyard pool', 'Olympic swimming pool']).toContain(unit.singular)
-  })
-
-  it('large amounts map to small lakes', () => {
-    expect(selectLakeUnit(1_000_000_000).singular).toBe('large lake')
-  })
-
-  it('returns a unit for very small amounts', () => {
-    const unit = selectLakeUnit(1)
-    expect(unit).toBeDefined()
-  })
-
-  it('lake equivalent < 1 is still displayable', () => {
-    // 50L → well under a bathtub (2500L), so 50/2500 = 0.02 bathtubs
-    const unit = selectLakeUnit(50)
-    const equivalent = 50 / unit.liters
-    expect(equivalent).toBeGreaterThan(0)
-  })
-})
-
-// ---------------------------------------------------------------------------
 // formatResult
 // ---------------------------------------------------------------------------
 
@@ -318,8 +291,8 @@ describe('formatResult', () => {
   it('returns all required fields', () => {
     const result = formatResult(1_000)
     expect(result).toHaveProperty('totalLiters')
-    expect(result).toHaveProperty('lakeEquivalent')
-    expect(result).toHaveProperty('lakeUnit')
+    expect(result).toHaveProperty('lakes')
+    expect(result).toHaveProperty('reactionLine')
     expect(result).toHaveProperty('comparisons')
   })
 
@@ -327,29 +300,39 @@ describe('formatResult', () => {
     expect(formatResult(5_000).totalLiters).toBe(5_000)
   })
 
-  it('comparisons array is non-empty', () => {
-    expect(formatResult(1_000).comparisons.length).toBeGreaterThan(0)
-  })
-
-  it('bathtub comparison is correct', () => {
-    const result = formatResult(5_000)
-    const bathtubComp = result.comparisons.find(c => c.label === 'bathtubs')
-    // 5000 / 2500 = 2 bathtubs
-    expect(bathtubComp?.value).toBeCloseTo(2, 1)
-  })
-
-  it('drinking water comparison is correct', () => {
-    const result = formatResult(1_000)
-    const drinkComp = result.comparisons.find(c => c.label === 'daily drinking water')
-    // 1000 / 2 = 500
-    expect(drinkComp?.value).toBe(500)
-  })
-
-  it('lakeEquivalent is totalLiters / selected unit size', () => {
-    const liters = 3_000_000
+  it('lakes = totalLiters / LITERS_PER_LAKE', () => {
+    const liters = 30_000
     const result = formatResult(liters)
-    const unit = selectLakeUnit(liters)
-    expect(result.lakeEquivalent).toBeCloseTo(liters / unit.liters, 5)
+    expect(result.lakes).toBeCloseTo(liters / LITERS_PER_LAKE, 5)
+  })
+
+  it('comparisons array has 2 entries', () => {
+    expect(formatResult(1_000).comparisons.length).toBe(2)
+  })
+
+  it('shower comparison is correct', () => {
+    const result = formatResult(6_500)
+    const showerComp = result.comparisons.find(c => c.label === 'showers')
+    // 6500 / 65 = 100 showers
+    expect(showerComp?.value).toBe(100)
+  })
+
+  it('coffee comparison is correct', () => {
+    const result = formatResult(100)
+    const coffeeComp = result.comparisons.find(c => c.label === 'cups of coffee')
+    // 100 / 0.25 = 400
+    expect(coffeeComp?.value).toBe(400)
+  })
+
+  it('reactionLine is a non-empty string', () => {
+    expect(typeof formatResult(1_000).reactionLine).toBe('string')
+    expect(formatResult(1_000).reactionLine.length).toBeGreaterThan(0)
+  })
+
+  it('different lake amounts produce different reaction lines', () => {
+    const tiny = formatResult(10).reactionLine      // < 0.01 lakes
+    const large = formatResult(500_000).reactionLine // 50 lakes
+    expect(tiny).not.toBe(large)
   })
 })
 
@@ -369,11 +352,10 @@ describe('end-to-end scenarios', () => {
     const result = formatResult(liters)
     expect(result.totalLiters).toBeGreaterThan(100)
     expect(result.totalLiters).toBeLessThan(1_000_000)
-    expect(result.lakeEquivalent).toBeGreaterThan(0)
+    expect(result.lakes).toBeGreaterThan(0)
   })
 
   it('enterprise dev with 10M tokens/month for 2 years = dramatic result', () => {
-    // 10M × (25mL/1000) × 1.8 (outputMult at 0.7) × 24 / 1000 = 10,800 L
     const liters = calculatePowerUserTokens({
       monthlyTokens: 10_000_000,
       outputRatio: 0.7,
@@ -382,8 +364,8 @@ describe('end-to-end scenarios', () => {
     })
     const result = formatResult(liters)
     expect(result.totalLiters).toBeGreaterThan(10_000)
-    expect(result.lakeEquivalent).toBeGreaterThan(0)
-    expect(result.lakeUnit).toBeDefined()
+    expect(result.lakes).toBeGreaterThan(1)
+    expect(result.reactionLine).toBeDefined()
   })
 
   it('light API user for 3 months = modest result', () => {
@@ -395,6 +377,6 @@ describe('end-to-end scenarios', () => {
     })
     const result = formatResult(liters)
     expect(result.totalLiters).toBeGreaterThan(0)
-    expect(result.lakeUnit).toBeDefined()
+    expect(result.reactionLine).toBeDefined()
   })
 })

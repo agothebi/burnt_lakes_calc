@@ -146,7 +146,7 @@ describe('burn progress responds to answer progression', () => {
     const heavy = litersToProgress(
       estimateFromPartialAnswers({
         userType: 'regular',
-        tools: ['chatgpt', 'image-ai'],
+        tools: ['chatgpt', 'image-gen'],
         frequencyPerWeek: 'daily',
         sessionLength: 'over2h',
         conversationStyle: 'debate',

@@ -22,7 +22,7 @@ export type FrequencyPerWeek = '1-2' | '3-4' | '5-6' | 'daily'
 export type SessionLength = 'under15' | '15to30' | '30to60' | '1to2h' | 'over2h'
 export type ConversationStyle = 'quick' | 'backforth' | 'long' | 'debate'
 export type CallSize = 'single' | '3to5' | '10plus' | 'full'
-export type AiTool = 'chatgpt' | 'claude' | 'gemini' | 'copilot' | 'perplexity' | 'image-ai' | 'other'
+export type AiTool = 'chatgpt' | 'claude' | 'gemini' | 'copilot' | 'perplexity' | 'image-gen' | 'other'
 
 export interface RegularUserInput {
   tools: AiTool[] | readonly AiTool[]
@@ -48,8 +48,8 @@ export interface PowerUserCallsInput {
 
 export interface CalculationResult {
   totalLiters: number
-  lakeEquivalent: number
-  lakeUnit: string
+  lakes: number
+  reactionLine: string
   comparisons: Comparison[]
 }
 
@@ -138,11 +138,11 @@ export function outputRatioMultiplier(ratio: number): number {
 }
 
 /**
- * Tool multiplier — image AI is GPU-heavy and adds significant overhead.
- * If the user uses image AI tools, apply a multiplier to their total.
+ * Tool multiplier — image generation is GPU-heavy and adds significant overhead.
+ * If the user uses image generation tools, apply a multiplier to their total.
  */
 export function toolMultiplier(tools: AiTool[] | readonly AiTool[]): number {
-  return tools.includes('image-ai') ? 1.6 : 1.0
+  return tools.includes('image-gen') ? 1.6 : 1.0
 }
 
 // ---------------------------------------------------------------------------
@@ -167,8 +167,8 @@ export function calculateRegularUser(input: RegularUserInput): number {
   const convMult = CONVERSATION_MULTIPLIER[input.conversationStyle]
   const toolMult = toolMultiplier(input.tools)
 
-  // Infer model tier: image AI implies heavier GPU compute
-  const inferredTier: ModelTier = input.tools.includes('image-ai') ? 'frontier' : 'mid'
+  // Infer model tier: image generation implies heavier GPU compute
+  const inferredTier: ModelTier = input.tools.includes('image-gen') ? 'frontier' : 'mid'
   const modelMult = MODEL_MULTIPLIER[inferredTier]
 
   const messagesPerDay = messagesPerSession * freqMult * convMult
@@ -224,61 +224,46 @@ export function calculatePowerUserCalls(input: PowerUserCallsInput): number {
 // Result formatting
 // ---------------------------------------------------------------------------
 
-interface LakeUnit {
-  liters: number
-  singular: string
-  plural: string
-}
-
-const LAKE_UNITS: LakeUnit[] = [
-  { liters: 2_500,           singular: 'bathtub',              plural: 'bathtubs' },
-  { liters: 25_000,          singular: 'backyard pool',        plural: 'backyard pools' },
-  { liters: 2_500_000,       singular: 'Olympic swimming pool', plural: 'Olympic swimming pools' },
-  { liters: 500_000_000,     singular: 'small lake',           plural: 'small lakes' },
-  { liters: 4_800_000_000,   singular: 'large lake',           plural: 'large lakes' },
-]
-
 /**
- * Pick the most dramatic-but-comprehensible lake unit for the given liter count.
- * We want a number between 0.01 and ~1000 for readability.
+ * A "lake" is defined as a small natural lake / large pond (~10,000 liters).
+ * This gives satisfying numbers: casual users burn fractions of a lake,
+ * heavy users burn whole ones, power devs burn several.
  */
-export function selectLakeUnit(liters: number): LakeUnit {
-  for (let i = LAKE_UNITS.length - 1; i >= 0; i--) {
-    if (liters / LAKE_UNITS[i].liters >= 0.01) {
-      return LAKE_UNITS[i]
-    }
-  }
-  return LAKE_UNITS[0]
+export const LITERS_PER_LAKE = 10_000
+
+function getReactionLine(lakes: number): string {
+  if (lakes < 0.01)  return 'Barely a splash. For now.'
+  if (lakes < 0.1)   return 'The fish have noticed.'
+  if (lakes < 0.5)   return 'The waterline is measurably lower.'
+  if (lakes < 1)     return 'Almost a full lake. Almost.'
+  if (lakes < 5)     return 'Multiple lakes. The ducks have filed a complaint.'
+  if (lakes < 20)    return 'A regional aquatic incident.'
+  if (lakes < 100)   return 'You are the drought.'
+  return 'Scientists are naming the dry basin after you.'
 }
 
 export function formatResult(totalLiters: number): CalculationResult {
-  const unit = selectLakeUnit(totalLiters)
-  const lakeEquivalent = totalLiters / unit.liters
+  const lakes = totalLiters / LITERS_PER_LAKE
 
   const comparisons: Comparison[] = [
     {
-      label: 'bathtubs',
-      value: Math.round(totalLiters / 2_500 * 10) / 10,
-      unit: totalLiters / 2_500 === 1 ? 'bathtub' : 'bathtubs',
+      label: 'showers',
+      // Average shower uses ~65L
+      value: Math.round(totalLiters / 65),
+      unit: 'showers',
     },
     {
-      label: 'daily drinking water',
-      // Average human drinks ~2L/day
-      value: Math.round(totalLiters / 2),
-      unit: 'person-days of drinking water',
-    },
-    {
-      label: 'toilet flushes',
-      // Average flush ~6L
-      value: Math.round(totalLiters / 6),
-      unit: 'toilet flushes',
+      label: 'cups of coffee',
+      // ~250ml of water to brew one cup
+      value: Math.round(totalLiters / 0.25),
+      unit: 'cups of coffee',
     },
   ]
 
   return {
     totalLiters,
-    lakeEquivalent,
-    lakeUnit: lakeEquivalent === 1 ? unit.singular : unit.plural,
+    lakes,
+    reactionLine: getReactionLine(lakes),
     comparisons,
   }
 }

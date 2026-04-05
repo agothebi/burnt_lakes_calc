@@ -38,19 +38,18 @@ function computeResult(answers: WizardControls['answers']) {
   })
 }
 
-function buildShareText(liters: number, lakeEquivalent: number, lakeUnit: string) {
-  const l = Math.round(liters).toLocaleString()
-  const eq = lakeEquivalent < 1
-    ? `${Math.round(lakeEquivalent * 100)}% of a ${lakeUnit.replace(/s$/, '')}`
-    : `${lakeEquivalent.toFixed(1)} ${lakeUnit}`
-  return `I just found out I've evaporated ~${l} liters of water through AI usage. That's ${eq}. Find out yours: https://burnedlakes.dev`
+function formatLakes(lakes: number): string {
+  if (lakes < 0.01) return `${(lakes * 100).toFixed(1)}% of a lake`
+  if (lakes < 10)   return `${lakes.toFixed(2)} lakes`
+  if (lakes < 1000) return `${Math.round(lakes)} lakes`
+  return `${Math.round(lakes).toLocaleString()} lakes`
 }
 
-const COMPARISON_COPY = [
-  (bathtubs: number) => `Enough to fill ${Math.round(bathtubs).toLocaleString()} bathtubs`,
-  (liters: number) => `${Math.round(liters / 2).toLocaleString()} days of drinking water for one person`,
-  (liters: number) => `${Math.round(liters / 6).toLocaleString()} toilet flushes`,
-]
+function buildShareText(liters: number, lakes: number) {
+  const l = Math.round(liters).toLocaleString()
+  return `I just burned ${formatLakes(lakes)} worth of water through AI usage — that's ~${l} liters. How many lakes have you burned? burnedlakes.dev`
+}
+
 
 export function ResultStep({ wizard }: { wizard: WizardControls }) {
   const confettiFired = useRef(false)
@@ -75,13 +74,11 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
     }, 400)
   }, [])
 
-  const shareText = buildShareText(totalLiters, result.lakeEquivalent, result.lakeUnit)
+  const shareText = buildShareText(totalLiters, result.lakes)
 
   function handleShare() {
     navigator.clipboard.writeText(shareText).catch(() => {})
   }
-
-  const bathtubs = totalLiters / 2_500
 
   return (
     <div className="flex flex-col gap-4 md:gap-6 max-w-lg">
@@ -105,7 +102,7 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         </p>
       </motion.div>
 
-      {/* Primary stat */}
+      {/* Primary stat — lakes */}
       <motion.div
         className="clay clay-coral p-4 md:p-6 flex flex-col gap-1"
         initial={{ opacity: 0, scale: 0.95 }}
@@ -113,39 +110,39 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         transition={{ delay: 0.15, duration: 0.4 }}
       >
         <p className="font-body text-sm font-bold text-[#1A1A2E]/60 uppercase tracking-widest">
-          Water evaporated
+          Lakes burned
         </p>
         <p className="font-display text-6xl md:text-7xl text-[#1A1A2E]">
-          {totalLiters < 1 ? (
-            <span>&lt; 1</span>
+          {result.lakes < 0.01 ? (
+            <span>{(result.lakes * 100).toFixed(1)}%</span>
           ) : (
             <AnimatedNumber
-              value={Math.round(totalLiters)}
-              formatFn={n => Math.round(n).toLocaleString()}
+              value={result.lakes}
+              formatFn={n => n < 10 ? n.toFixed(2) : Math.round(n).toLocaleString()}
               duration={1600}
             />
           )}
-          <span className="text-xl md:text-2xl ml-2">{totalLiters === 1 ? 'liter' : 'liters'}</span>
+          {result.lakes >= 0.01 && (
+            <span className="text-xl md:text-2xl ml-2">{result.lakes === 1 ? 'lake' : 'lakes'}</span>
+          )}
+          {result.lakes < 0.01 && (
+            <span className="text-xl md:text-2xl ml-2">of a lake</span>
+          )}
+        </p>
+        <p className="font-body text-xs text-[#1A1A2E]/40 mt-1">
+          (~{Math.round(totalLiters).toLocaleString()} liters of real water)
         </p>
       </motion.div>
 
-      {/* Lake equivalent */}
+      {/* Reaction line */}
       <motion.div
         className="clay clay-blue p-4 md:p-6 flex flex-col gap-1"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
-        <p className="font-body text-sm font-bold text-[#1A1A2E]/60 uppercase tracking-widest">
-          That's equivalent to
-        </p>
-        <p className="font-display text-3xl md:text-4xl text-[#1A1A2E]">
-          <AnimatedNumber
-            value={result.lakeEquivalent}
-            formatFn={n => n < 1 ? n.toFixed(2) : n.toFixed(1)}
-            duration={1400}
-          />
-          <span className="text-2xl ml-2">{result.lakeEquivalent === 1 ? result.lakeUnit.replace(/s$/, '') : result.lakeUnit}</span>
+        <p className="font-display text-2xl md:text-3xl text-[#1A1A2E]">
+          {result.reactionLine}
         </p>
       </motion.div>
 
@@ -156,18 +153,14 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        {COMPARISON_COPY.map((fn, i) => (
+        {result.comparisons.map((c, i) => (
           <div
             key={i}
             className="clay clay-cream px-5 py-3 font-body text-sm font-semibold text-[#1A1A2E]/70"
           >
-            {fn(i === 0 ? bathtubs : totalLiters)}
+            {c.value.toLocaleString()} {c.unit}
           </div>
         ))}
-
-        <p className="font-body text-xs text-[#1A1A2E]/30 px-1">
-          For context: Lake Tahoe holds ~150 billion liters. You're getting there.
-        </p>
       </motion.div>
 
       {/* Actions */}
@@ -181,7 +174,7 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
           Share this tragedy
         </ClayButton>
         <ClayButton color="cream" onClick={wizard.reset} fullWidth>
-          Recalculate
+          Try again (different answers won't help)
         </ClayButton>
       </motion.div>
     </div>

@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { WizardControls } from '../../hooks/useWizard'
 
 const LOADING_LINES = [
-  'Consulting the fish...',
-  'Converting regrets to liters...',
-  'Tallying evaporated molecules...',
-  'Cross-referencing with local aquifer...',
-  'Preparing your environmental rap sheet...',
+  'Measuring the waterline...',
+  'Consulting the last surviving fish...',
+  'Tallying your lake debt...',
+  'Filing your arson report with the ducks...',
+  'Summing up the ripple damage...',
 ]
 
 export function LoadingStep({ wizard }: { wizard: WizardControls }) {
@@ -72,7 +72,7 @@ export function LoadingStep({ wizard }: { wizard: WizardControls }) {
       </motion.div>
 
       <div className="flex flex-col gap-2">
-        <p className="font-display text-2xl text-[#1A1A2E]">Calculating...</p>
+        <p className="font-display text-2xl text-[#1A1A2E]">Assessing the damage...</p>
         <AnimatePresence mode="wait">
           <motion.p
             key={lineIndex}

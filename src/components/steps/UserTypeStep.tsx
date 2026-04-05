@@ -9,9 +9,6 @@ export function UserTypeStep({ wizard }: { wizard: WizardControls }) {
 
       <div>
         <h2 className="text-4xl text-[#1A1A2E] mb-2">Who are you?</h2>
-        <p className="font-body text-base text-[#1A1A2E]/50">
-          Be honest. The lake already knows.
-        </p>
       </div>
 
       <div className="flex flex-col gap-4">

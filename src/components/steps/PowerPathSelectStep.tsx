@@ -10,7 +10,7 @@ export function PowerPathSelectStep({ wizard }: { wizard: WizardControls }) {
       <div>
         <h2 className="text-4xl text-[#1A1A2E] mb-2">How do you track your usage?</h2>
         <p className="font-body text-base text-[#1A1A2E]/50">
-          Pick whichever one gives you a number to work with.
+          Pick the one you can actually answer.
         </p>
       </div>
 

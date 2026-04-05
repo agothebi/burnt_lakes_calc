@@ -20,7 +20,7 @@ const TOOL_OPTIONS: { value: AiTool; label: string }[] = [
   { value: 'gemini',     label: 'Gemini' },
   { value: 'copilot',    label: 'Copilot' },
   { value: 'perplexity', label: 'Perplexity' },
-  { value: 'image-ai',   label: 'Image AI' },
+  { value: 'image-gen',  label: 'Image Generation' },
   { value: 'other',      label: 'Other' },
 ]
 
@@ -40,10 +40,10 @@ const SESSION_OPTIONS: { value: SessionLength; label: string }[] = [
 ]
 
 const STYLE_OPTIONS: { value: ConversationStyle; label: string }[] = [
-  { value: 'quick',     label: 'Quick one-off question' },
-  { value: 'backforth', label: 'Back-and-forth, a few exchanges' },
-  { value: 'long',      label: 'Long session, lots of messages' },
-  { value: 'debate',    label: 'Full philosophical debates' },
+  { value: 'quick',     label: 'One quick question' },
+  { value: 'backforth', label: 'Back and forth, a few rounds' },
+  { value: 'long',      label: 'Long session, deep in the weeds' },
+  { value: 'debate',    label: 'Full rabbit hole, lose track of time' },
 ]
 
 const MONTH_LABELS: Record<number, string> = {
@@ -111,7 +111,7 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
   const questions = [
     {
       heading: 'Which AI tools do you use most?',
-      subheading: 'Select all that apply.',
+      subheading: 'Pick everything you use.',
       canContinue: tools.length > 0,
       content: (
         <ClayChipGroup
@@ -124,7 +124,7 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'How many days a week do you use AI?',
-      subheading: 'On average, including light usage.',
+      subheading: 'Count the lazy days too.',
       canContinue: frequency !== null,
       content: (
         <PillGroup
@@ -135,8 +135,8 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
       ),
     },
     {
-      heading: 'On a typical active day, how long are you chatting?',
-      subheading: 'Total time across all AI sessions.',
+      heading: 'On a typical day, how long are you at it?',
+      subheading: 'Across everything.',
       canContinue: session !== null,
       content: (
         <PillGroup
@@ -147,8 +147,8 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
       ),
     },
     {
-      heading: 'How would you describe a typical conversation?',
-      subheading: "Be honest. There's no judgment here. (There is a little.)",
+      heading: 'What does a typical session look like?',
+      subheading: 'Pick the closest match.',
       canContinue: style !== null,
       content: (
         <PillGroup
@@ -160,7 +160,7 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'How long have you been using AI tools regularly?',
-      subheading: 'Since you started using them at least weekly.',
+      subheading: 'At least weekly counts.',
       canContinue: true,
       content: (
         <ClaySlider
@@ -210,7 +210,7 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
           onClick={advance}
           disabled={!current.canContinue}
         >
-          {q === TOTAL - 1 ? 'See my damage' : 'Continue'}
+          {q === TOTAL - 1 ? 'Show me my lakes' : 'Continue'}
         </ClayButton>
       )}
     </div>

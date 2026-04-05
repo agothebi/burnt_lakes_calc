@@ -9,9 +9,9 @@ import type { WizardControls } from '../../hooks/useWizard'
 import type { ModelTier, CallSize } from '../../utils/calculator'
 
 const MODEL_OPTIONS: { value: ModelTier; label: string }[] = [
-  { value: 'small',    label: 'Small / fast  (GPT-3.5, Haiku, Flash)' },
-  { value: 'mid',      label: 'Mid-tier  (GPT-4o, Sonnet, Pro)' },
-  { value: 'frontier', label: 'Frontier  (GPT-4, Opus, Ultra)' },
+  { value: 'small',    label: 'Small / fast  (GPT-5.4 mini, Gemini 3.1 Flash-Lite, Claude Haiku 4.5)' },
+  { value: 'mid',      label: 'Mid-tier  (GPT-5.4, Gemini 3.1 Flash, Claude Sonnet 4.6)' },
+  { value: 'frontier', label: 'Frontier  (GPT-5.4 Pro, Gemini 3.1 Pro, Claude Opus 4.6)' },
 ]
 
 const CALL_SIZE_OPTIONS: { value: CallSize; label: string }[] = [
@@ -95,7 +95,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
   const tokenQuestions = [
     {
       heading: 'Roughly how many tokens per month?',
-      subheading: 'Input + output combined. Check your API dashboard.',
+      subheading: 'Input + output combined.',
       canContinue: true,
       content: (
         <div className="flex flex-col gap-4">
@@ -129,8 +129,8 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
       ),
     },
     {
-      heading: "What's your input/output split?",
-      subheading: 'Output tokens cost more compute — and more water.',
+      heading: 'Mostly prompting, or mostly generating?',
+      subheading: 'Output tokens are more compute-heavy.',
       canContinue: true,
       content: (
         <LabeledRangeSlider
@@ -144,7 +144,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'Which model family do you mainly use?',
-      subheading: 'Bigger models, bigger thirst.',
+      subheading: 'Bigger model, more water.',
       canContinue: modelTier !== null,
       content: (
         <PillGroup
@@ -156,7 +156,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'How long have you been at this usage level?',
-      subheading: 'Give or take a couple months.',
+      subheading: 'Ballpark is fine.',
       canContinue: true,
       content: (
         <ClaySlider
@@ -174,7 +174,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
   const callsQuestions = [
     {
       heading: 'How many API calls per day on average?',
-      subheading: "Across all services and environments.",
+      subheading: 'All environments, including the one you forgot about.',
       canContinue: true,
       content: (
         <div className="flex flex-wrap gap-3">
@@ -216,7 +216,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'Which model family do you mainly use?',
-      subheading: 'Bigger models, bigger thirst.',
+      subheading: 'Bigger model, more water.',
       canContinue: modelTier !== null,
       content: (
         <PillGroup
@@ -228,7 +228,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
     },
     {
       heading: 'How long have you been at this usage level?',
-      subheading: 'Give or take a couple months.',
+      subheading: 'Ballpark is fine.',
       canContinue: true,
       content: (
         <ClaySlider
@@ -282,7 +282,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
           onClick={advance}
           disabled={!current.canContinue}
         >
-          {q === TOTAL - 1 ? 'See my damage' : 'Continue'}
+          {q === TOTAL - 1 ? 'Show me my lakes' : 'Continue'}
         </ClayButton>
       )}
     </div>
