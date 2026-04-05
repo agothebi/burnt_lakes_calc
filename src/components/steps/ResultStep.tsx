@@ -196,7 +196,7 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
             transition={{ duration: 0.25, ease: 'easeOut' }}
           >
             {infoLines.map((line, i) => (
-              <p key={i} className="font-body text-xs text-[#1A1A2E]/60 font-mono whitespace-pre">
+              <p key={i} className="font-body text-xs text-[#1A1A2E]/60 font-mono whitespace-pre-wrap break-words">
                 {line}
               </p>
             ))}
