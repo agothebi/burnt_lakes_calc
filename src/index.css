@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────
+   Design Tokens
+   ───────────────────────────────────────────── */
+@theme {
+  /* Fonts */
+  --font-display: "Fredoka One", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  /* Page */
+  --color-page-bg: #FFF8EE;
+  --color-dark: #1A1A2E;
+
+  /* Clay Blue */
+  --color-clay-blue: #5BCEFA;
+  --color-clay-blue-light: #8ADEFF;
+  --color-clay-blue-shadow: #2A9BC4;
+
+  /* Clay Coral */
+  --color-clay-coral: #FF6B6B;
+  --color-clay-coral-light: #FF9494;
+  --color-clay-coral-shadow: #C94040;
+
+  /* Clay Lime */
+  --color-clay-lime: #A8E063;
+  --color-clay-lime-light: #C4ED8A;
+  --color-clay-lime-shadow: #6BAA1E;
+
+  /* Clay Purple */
+  --color-clay-purple: #C084FC;
+  --color-clay-purple-light: #D4A8FF;
+  --color-clay-purple-shadow: #8B2FCF;
+
+  /* Clay Yellow */
+  --color-clay-yellow: #FFD93D;
+  --color-clay-yellow-light: #FFE878;
+  --color-clay-yellow-shadow: #C9A400;
+
+  /* Clay Cream (neutral cards) */
+  --color-clay-cream: #FFF0D6;
+  --color-clay-cream-light: #FFF8EE;
+  --color-clay-cream-shadow: #D4A96A;
+}
+
+/* ─────────────────────────────────────────────
+   Base Reset + Global Styles
+   ───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-page-bg);
+  color: var(--color-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400; /* Fredoka One is a display weight itself */
+  color: var(--color-dark);
+  line-height: 1.1;
+}
+
+/* ─────────────────────────────────────────────
+   Claymorphism Utilities
+   ───────────────────────────────────────────── */
+
+/* Base clay card shape — apply color variants via inline style or CSS vars */
+.clay {
+  border-radius: 24px;
+  background: linear-gradient(160deg, var(--clay-light, #fff), var(--clay-base, #eee));
+  box-shadow:
+    0 8px 0 0 var(--clay-shadow, #ccc),
+    inset 0 2px 5px rgba(255, 255, 255, 0.55);
+  transition: box-shadow 80ms ease, transform 80ms ease;
+}
+
+.clay:active,
+.clay[data-pressed="true"] {
+  transform: translateY(4px);
+  box-shadow:
+    0 4px 0 0 var(--clay-shadow, #ccc),
+    inset 0 2px 5px rgba(255, 255, 255, 0.55);
+}
+
+/* Preset color variants */
+.clay-blue   { --clay-light: #8ADEFF; --clay-base: #5BCEFA; --clay-shadow: #2A9BC4; }
+.clay-coral  { --clay-light: #FF9494; --clay-base: #FF6B6B; --clay-shadow: #C94040; }
+.clay-lime   { --clay-light: #C4ED8A; --clay-base: #A8E063; --clay-shadow: #6BAA1E; }
+.clay-purple { --clay-light: #D4A8FF; --clay-base: #C084FC; --clay-shadow: #8B2FCF; }
+.clay-yellow { --clay-light: #FFE878; --clay-base: #FFD93D; --clay-shadow: #C9A400; }
+.clay-cream  { --clay-light: #FFF8EE; --clay-base: #FFF0D6; --clay-shadow: #D4A96A; }
