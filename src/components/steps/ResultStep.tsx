@@ -45,7 +45,7 @@ function computeResult(answers: WizardControls['answers']) {
 }
 
 function formatLakes(lakes: number): string {
-  if (lakes < 0.002) return `${(lakes * 100).toFixed(2)}% of a lake`
+  if (lakes < 0.005) return `${(lakes * 100).toFixed(3)}% of a lake`
   if (lakes < 10)    return `${lakes.toFixed(2)} lakes`
   if (lakes < 1000)  return `${Math.round(lakes)} lakes`
   return `${Math.round(lakes).toLocaleString()} lakes`
@@ -53,7 +53,7 @@ function formatLakes(lakes: number): string {
 
 function buildShareText(liters: number, lakes: number) {
   const l = Math.round(liters).toLocaleString()
-  return `I just burned ${formatLakes(lakes)} worth of water through AI usage — that's ~${l} liters. How many lakes have you burned? https://burnt-lakes.vercel.app`
+  return `I have burned ${formatLakes(lakes)} worth of water through AI usage — that's ~${l} liters. How many lakes have you burned? https://burnt-lakes.vercel.app`
 }
 
 const FREQ_LABEL: Record<string, string> = {
@@ -210,8 +210,8 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
           Lakes burned
         </p>
         <p className="font-display text-6xl md:text-7xl text-[#1A1A2E]">
-          {result.lakes < 0.002 ? (
-            <span>{(result.lakes * 100).toFixed(2)}%</span>
+          {result.lakes < 0.005 ? (
+            <span>{(result.lakes * 100).toFixed(3)}%</span>
           ) : (
             <AnimatedNumber
               value={result.lakes}
@@ -219,10 +219,10 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
               duration={1600}
             />
           )}
-          {result.lakes >= 0.002 && (
+          {result.lakes >= 0.005 && (
             <span className="text-xl md:text-2xl ml-2">{result.lakes === 1 ? 'lake' : 'lakes'}</span>
           )}
-          {result.lakes < 0.002 && (
+          {result.lakes < 0.005 && (
             <span className="text-xl md:text-2xl ml-2">of a lake</span>
           )}
         </p>

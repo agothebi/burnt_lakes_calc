@@ -330,9 +330,23 @@ describe('formatResult', () => {
   })
 
   it('different lake amounts produce different reaction lines', () => {
-    const tiny = formatResult(10).reactionLine      // < 0.01 lakes
-    const large = formatResult(500_000).reactionLine // 50 lakes
+    const tiny  = formatResult(10).reactionLine        // 0.0002 lakes → "Barely a splash"
+    const large = formatResult(5_000_000).reactionLine // 100 lakes → "You are the drought"
     expect(tiny).not.toBe(large)
+  })
+
+  it('reaction line is accurate for sub-1 lake values', () => {
+    // 25,000L = 0.5 lakes — should NOT say "Multiple lakes"
+    const result = formatResult(25_000)
+    expect(result.reactionLine).not.toContain('Multiple lakes')
+    expect(result.reactionLine).toBe('Almost a whole lake. Almost.')
+  })
+
+  it('"Multiple lakes" only fires at >= 2 lakes', () => {
+    const justUnder2 = formatResult(2 * 50_000 - 1).reactionLine // 1.99999 lakes
+    const over2      = formatResult(2 * 50_000 + 1).reactionLine // 2.00002 lakes
+    expect(justUnder2).toBe('One whole lake. The ducks are furious.')
+    expect(over2).toBe('Multiple lakes. The ducks have filed a complaint.')
   })
 })
 
