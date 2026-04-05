@@ -37,6 +37,7 @@ function App() {
 
   return (
     <SplitLayout
+      step={wizard.step}
       left={<LakeScene progress={burnProgress} />}
       right={
         <div className="max-w-xl w-full mx-auto">

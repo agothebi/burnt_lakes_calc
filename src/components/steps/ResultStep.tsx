@@ -10,6 +10,7 @@ import {
   calculatePowerUserCalls,
   formatResult,
 } from '../../utils/calculator'
+import { interpolateStops, STOPS } from '../scene/sceneUtils'
 
 function computeResult(answers: WizardControls['answers']) {
   if (answers.userType === 'power') {
@@ -56,6 +57,11 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
   const totalLiters = computeResult(wizard.answers)
   const result = formatResult(totalLiters)
 
+  // Burn progress (0–1 log scale) — used for the mobile accent bar color
+  const burnProgress = Math.min(1, Math.max(0, (Math.log10(Math.max(1, totalLiters)) / 5)))
+  const accentLeft = interpolateStops(STOPS.skyTop, burnProgress)
+  const accentRight = interpolateStops(STOPS.skyBot, burnProgress)
+
   useEffect(() => {
     if (confettiFired.current) return
     confettiFired.current = true
@@ -79,6 +85,15 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
 
   return (
     <div className="flex flex-col gap-4 md:gap-6 max-w-lg">
+      {/* Mobile-only accent bar: replaces the lake scene visual cue */}
+      <motion.div
+        className="md:hidden h-1.5 rounded-full"
+        style={{ background: `linear-gradient(to right, ${accentLeft}, ${accentRight})` }}
+        initial={{ opacity: 0, scaleX: 0 }}
+        animate={{ opacity: 1, scaleX: 1 }}
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+      />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
