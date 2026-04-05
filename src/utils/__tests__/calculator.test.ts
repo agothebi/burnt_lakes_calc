@@ -336,15 +336,15 @@ describe('formatResult', () => {
   })
 
   it('reaction line is accurate for sub-1 lake values', () => {
-    // 25,000L = 0.5 lakes — should NOT say "Multiple lakes"
+    // 25,000L = 0.125 lakes (with LITERS_PER_LAKE = 200,000) — should NOT say "Multiple lakes"
     const result = formatResult(25_000)
     expect(result.reactionLine).not.toContain('Multiple lakes')
-    expect(result.reactionLine).toBe('Almost a whole lake. Almost.')
+    expect(result.reactionLine).toBe('A meaningful chunk of a lake, gone.')
   })
 
   it('"Multiple lakes" only fires at >= 2 lakes', () => {
-    const justUnder2 = formatResult(2 * 50_000 - 1).reactionLine // 1.99999 lakes
-    const over2      = formatResult(2 * 50_000 + 1).reactionLine // 2.00002 lakes
+    const justUnder2 = formatResult(2 * LITERS_PER_LAKE - 1).reactionLine // 1.99999 lakes
+    const over2      = formatResult(2 * LITERS_PER_LAKE + 1).reactionLine // 2.00002 lakes
     expect(justUnder2).toBe('One whole lake. The ducks are furious.')
     expect(over2).toBe('Multiple lakes. The ducks have filed a complaint.')
   })
@@ -378,7 +378,7 @@ describe('end-to-end scenarios', () => {
     })
     const result = formatResult(liters)
     expect(result.totalLiters).toBeGreaterThan(10_000)
-    expect(result.lakes).toBeGreaterThan(0.1)
+    expect(result.lakes).toBeGreaterThan(0.01)
     expect(result.reactionLine).toBeDefined()
   })
 

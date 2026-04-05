@@ -114,7 +114,7 @@ function buildInfoLines(answers: WizardControls['answers'], totalLiters: number)
   }
   lines.push(`Duration:          ${answers.monthsActive ?? 6} months`)
   lines.push(`Total water:       ~${Math.round(totalLiters).toLocaleString()} liters`)
-  lines.push(`1 lake =           50,000 liters (a small natural lake)`)
+  lines.push(`1 lake =           200,000 liters (a small natural lake)`)
   lines.push(`Source: Li et al. 2023 (UC Riverside) — arxiv.org/abs/2304.03271`)
   return lines
 }

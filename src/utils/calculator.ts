@@ -109,10 +109,10 @@ export const MESSAGES_PER_SESSION: Record<SessionLength, number> = {
 
 /** Conversation depth multiplier */
 export const CONVERSATION_MULTIPLIER: Record<ConversationStyle, number> = {
-  quick: 0.4,
+  quick: 0.5,
   backforth: 1.0,
-  long: 1.6,
-  debate: 2.5,
+  long: 1.3,
+  debate: 1.6,
 }
 
 /** Average tokens per API call by call size */
@@ -229,7 +229,7 @@ export function calculatePowerUserCalls(input: PowerUserCallsInput): number {
  * This gives satisfying numbers: casual users burn small fractions,
  * heavy users approach a lake, power devs burn several.
  */
-export const LITERS_PER_LAKE = 50_000
+export const LITERS_PER_LAKE = 200_000
 
 function getReactionLine(lakes: number): string {
   if (lakes < 0.005)  return 'Barely a splash. For now.'
