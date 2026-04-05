@@ -253,10 +253,10 @@ export function formatResult(totalLiters: number): CalculationResult {
       unit: 'showers',
     },
     {
-      label: 'cups of coffee',
-      // ~250ml of water to brew one cup
-      value: Math.round(totalLiters / 0.25),
-      unit: 'cups of coffee',
+      label: 'Olympic pools',
+      // Olympic swimming pool = 2,500,000 liters
+      value: +(totalLiters / 2_500_000).toFixed(6),
+      unit: 'Olympic swimming pools',
     },
   ]
 

@@ -255,7 +255,12 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
             key={i}
             className="clay clay-cream px-5 py-3 font-body text-sm font-semibold text-[#1A1A2E]/70"
           >
-            {c.value.toLocaleString()} {c.unit}
+            {c.label === 'Olympic pools'
+              ? c.value < 1
+                ? `${(c.value * 100).toFixed(4)}% of an Olympic swimming pool`
+                : `${c.value.toFixed(2)} Olympic swimming pools`
+              : `${c.value.toLocaleString()} ${c.unit}`
+            }
           </div>
         ))}
       </motion.div>

@@ -317,11 +317,11 @@ describe('formatResult', () => {
     expect(showerComp?.value).toBe(100)
   })
 
-  it('coffee comparison is correct', () => {
-    const result = formatResult(100)
-    const coffeeComp = result.comparisons.find(c => c.label === 'cups of coffee')
-    // 100 / 0.25 = 400
-    expect(coffeeComp?.value).toBe(400)
+  it('Olympic pool comparison is correct', () => {
+    const result = formatResult(2_500_000)
+    const poolComp = result.comparisons.find(c => c.label === 'Olympic pools')
+    // 2_500_000 / 2_500_000 = 1 pool
+    expect(poolComp?.value).toBeCloseTo(1, 4)
   })
 
   it('reactionLine is a non-empty string', () => {
