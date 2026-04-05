@@ -364,7 +364,7 @@ describe('end-to-end scenarios', () => {
     })
     const result = formatResult(liters)
     expect(result.totalLiters).toBeGreaterThan(10_000)
-    expect(result.lakes).toBeGreaterThan(1)
+    expect(result.lakes).toBeGreaterThan(0.1)
     expect(result.reactionLine).toBeDefined()
   })
 

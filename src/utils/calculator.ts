@@ -225,20 +225,20 @@ export function calculatePowerUserCalls(input: PowerUserCallsInput): number {
 // ---------------------------------------------------------------------------
 
 /**
- * A "lake" is defined as a small natural lake / large pond (~10,000 liters).
- * This gives satisfying numbers: casual users burn fractions of a lake,
- * heavy users burn whole ones, power devs burn several.
+ * A "lake" is defined as a small natural lake (~50,000 liters / 50 kL).
+ * This gives satisfying numbers: casual users burn small fractions,
+ * heavy users approach a lake, power devs burn several.
  */
-export const LITERS_PER_LAKE = 10_000
+export const LITERS_PER_LAKE = 50_000
 
 function getReactionLine(lakes: number): string {
-  if (lakes < 0.01)  return 'Barely a splash. For now.'
-  if (lakes < 0.1)   return 'The fish have noticed.'
-  if (lakes < 0.5)   return 'The waterline is measurably lower.'
-  if (lakes < 1)     return 'Almost a full lake. Almost.'
-  if (lakes < 5)     return 'Multiple lakes. The ducks have filed a complaint.'
-  if (lakes < 20)    return 'A regional aquatic incident.'
-  if (lakes < 100)   return 'You are the drought.'
+  if (lakes < 0.002)  return 'Barely a splash. For now.'
+  if (lakes < 0.02)   return 'The fish have noticed.'
+  if (lakes < 0.1)    return 'The waterline is measurably lower.'
+  if (lakes < 0.2)    return 'Almost a full lake. Almost.'
+  if (lakes < 1)      return 'Multiple lakes. The ducks have filed a complaint.'
+  if (lakes < 4)      return 'A regional aquatic incident.'
+  if (lakes < 20)     return 'You are the drought.'
   return 'Scientists are naming the dry basin after you.'
 }
 
