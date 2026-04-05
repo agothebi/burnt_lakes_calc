@@ -65,22 +65,21 @@ export interface Comparison {
 
 /**
  * Baseline water per message exchange in liters (GPT-3.5-class, mid-tier).
- * Reflects total data center water footprint: direct cooling + humidification
- * + water used to generate electricity (~5× direct-cooling-only estimates).
- * Source range: 10–250ml/message across published studies; we use 100ml as a
- * conservative total-footprint mid-point.
+ * Represents direct on-site data center cooling water only.
+ * Source: Li et al. (2023) estimates ~10–25mL per exchange for on-site cooling;
+ * we use 10mL as the conservative low-end of that range.
  */
-export const LITERS_PER_MESSAGE_BASELINE = 0.100
+export const LITERS_PER_MESSAGE_BASELINE = 0.010
 
 /**
  * Water per 1000 tokens in mL, by model tier.
- * Total footprint (direct + indirect). Frontier models run on larger GPU
+ * Direct on-site cooling estimate. Frontier models run on larger GPU
  * clusters with higher power draw, resulting in proportionally more water.
  */
 export const ML_PER_1K_TOKENS: Record<ModelTier, number> = {
-  small: 4.0,
-  mid: 10.0,
-  frontier: 25.0,
+  small: 1.0,
+  mid:   2.5,
+  frontier: 6.0,
 }
 
 /** Model tier multiplier applied to message-based paths */

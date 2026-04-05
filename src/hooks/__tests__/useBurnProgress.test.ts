@@ -72,8 +72,8 @@ describe('estimateFromPartialAnswers', () => {
       conversationStyle: 'backforth',
       monthsActive: 12,
     })
-    // 10 × 1.0 × 1.0 × 360 × 0.100 × 1.0 × 1.0 = 360 L
-    expect(result).toBeCloseTo(360, 0)
+    // 10 × 1.0 × 1.0 × 360 × 0.010 × 1.0 × 1.0 = 36 L
+    expect(result).toBeCloseTo(36, 0)
   })
 
   it('power token path with explicit answers returns correct estimate', () => {
@@ -85,8 +85,8 @@ describe('estimateFromPartialAnswers', () => {
       modelTier: 'mid',
       monthsActive: 1,
     })
-    // 1M × 0.010 × 1.0 × 1 / 1000 = 10 L
-    expect(result).toBeCloseTo(10, 3)
+    // 1M × (2.5/1000) × 1.0 × 1 / 1000 = 2.5 L
+    expect(result).toBeCloseTo(2.5, 3)
   })
 
   it('power calls path with explicit answers returns correct estimate', () => {

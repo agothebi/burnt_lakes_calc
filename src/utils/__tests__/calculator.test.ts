@@ -114,10 +114,10 @@ describe('calculateRegularUser', () => {
   })
 
   it('base case: daily, 15-30min, back-and-forth, 1 month, mid-tier = reasonable range', () => {
-    // 10 msgs/session × 1.0 (daily) × 1.0 (backforth) × 30 days × 0.100L × 1.0 (mid) × 1.0 (no img)
-    // = 10 × 30 × 0.100 = 30 liters
+    // 10 msgs/session × 1.0 (daily) × 1.0 (backforth) × 30 days × 0.010L × 1.0 (mid) × 1.0 (no img)
+    // = 10 × 30 × 0.010 = 3 liters
     const result = calculateRegularUser(baseInput)
-    expect(result).toBeCloseTo(30.0, 1)
+    expect(result).toBeCloseTo(3.0, 1)
   })
 
   it('more months → more water (proportional)', () => {
@@ -169,8 +169,8 @@ describe('calculateRegularUser', () => {
       conversationStyle: 'debate',
       monthsActive: 24,
     })
-    // Should be thousands of liters
-    expect(result).toBeGreaterThan(10_000)
+    // Should be hundreds–thousands of liters
+    expect(result).toBeGreaterThan(1_000)
   })
 })
 
@@ -191,10 +191,10 @@ describe('calculatePowerUserTokens', () => {
   })
 
   it('base case: 1M tokens, mid-tier, even split, 1 month', () => {
-    // 1_000_000 tokens × (10.0mL / 1000) × 1.0 (outputMult at 0.5) × 1 / 1000 (mL→L)
-    // = 1_000_000 × 0.010mL × 1.0 / 1000 = 10 liters
+    // 1_000_000 tokens × (2.5mL / 1000) × 1.0 (outputMult at 0.5) × 1 / 1000 (mL→L)
+    // = 1_000_000 × 0.0025mL × 1.0 / 1000 = 2.5 liters
     const result = calculatePowerUserTokens(baseInput)
-    expect(result).toBeCloseTo(10.0, 3)
+    expect(result).toBeCloseTo(2.5, 3)
   })
 
   it('frontier tier uses more water than mid for same tokens', () => {
@@ -364,7 +364,7 @@ describe('end-to-end scenarios', () => {
       monthsActive: 12,
     })
     const result = formatResult(liters)
-    expect(result.totalLiters).toBeGreaterThan(100)
+    expect(result.totalLiters).toBeGreaterThan(10)
     expect(result.totalLiters).toBeLessThan(1_000_000)
     expect(result.lakes).toBeGreaterThan(0)
   })
@@ -377,8 +377,8 @@ describe('end-to-end scenarios', () => {
       monthsActive: 24,
     })
     const result = formatResult(liters)
-    expect(result.totalLiters).toBeGreaterThan(10_000)
-    expect(result.lakes).toBeGreaterThan(0.01)
+    expect(result.totalLiters).toBeGreaterThan(1_000)
+    expect(result.lakes).toBeGreaterThan(0.001)
     expect(result.reactionLine).toBeDefined()
   })
 

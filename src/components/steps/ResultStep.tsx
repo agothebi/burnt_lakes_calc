@@ -110,7 +110,7 @@ function buildInfoLines(answers: WizardControls['answers'], totalLiters: number)
     lines.push(`Session length:    ${SESSION_LABEL[sess]}  (~${msgs} messages/session)`)
     lines.push(`Style:             ${STYLE_LABEL[style]}  (${convMult}× multiplier)`)
     lines.push(`Est. msgs/day:     ~${msgsPerDay}  over ${days} days`)
-    lines.push(`Water per message: ~100ml  (total data center footprint)`)
+    lines.push(`Water per message: ~10ml   (direct on-site data center cooling)`)
   }
   lines.push(`Duration:          ${answers.monthsActive ?? 6} months`)
   lines.push(`Total water:       ~${Math.round(totalLiters).toLocaleString()} liters`)
