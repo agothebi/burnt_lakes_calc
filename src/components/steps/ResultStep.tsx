@@ -45,9 +45,9 @@ function computeResult(answers: WizardControls['answers']) {
 }
 
 function formatLakes(lakes: number): string {
-  if (lakes < 0.005) return `${(lakes * 100).toFixed(3)}% of a lake`
-  if (lakes < 10)    return `${lakes.toFixed(2)} lakes`
-  if (lakes < 1000)  return `${Math.round(lakes)} lakes`
+  if (lakes < 0.0001) return `${(lakes * 100).toFixed(5)}% of a lake`
+  if (lakes < 10)     return `${lakes.toFixed(5)} lakes`
+  if (lakes < 1000)   return `${Math.round(lakes)} lakes`
   return `${Math.round(lakes).toLocaleString()} lakes`
 }
 
@@ -224,11 +224,11 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         </p>
         <p className="font-display text-6xl md:text-7xl text-[#1A1A2E]">
           {result.lakes < 0.005 ? (
-            <span>{(result.lakes * 100).toFixed(3)}%</span>
+            <span>{(result.lakes * 100).toFixed(5)}%</span>
           ) : (
             <AnimatedNumber
               value={result.lakes}
-              formatFn={n => n < 10 ? n.toFixed(2) : Math.round(n).toLocaleString()}
+              formatFn={n => n < 10 ? n.toFixed(5) : Math.round(n).toLocaleString()}
               duration={1600}
             />
           )}
