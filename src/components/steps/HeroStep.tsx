@@ -14,7 +14,7 @@ export function HeroStep({ wizard }: { wizard: WizardControls }) {
           How many lakes have you burned?
         </motion.h1>
         <p className="font-body text-xl text-[#1A1A2E]/60 font-semibold">
-          Not literally. Well. Kind of literally.
+          Let's keep it real.
         </p>
       </div>
 
