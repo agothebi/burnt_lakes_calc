@@ -20,6 +20,7 @@ interface SplitLayoutProps {
  */
 export function SplitLayout({ left, right, step }: SplitLayoutProps) {
   const mobileHideLake = step === 'results' || step === 'loading'
+  const isQuestionStep = step === 'userType' || step === 'powerPathSelect' || step === 'questions'
 
   return (
     <div className="h-dvh overflow-hidden flex flex-col md:flex-row">
@@ -30,10 +31,11 @@ export function SplitLayout({ left, right, step }: SplitLayoutProps) {
         flex-1 md:flex-1
         min-h-0 overflow-y-auto
       ">
-        <div className="
+        <div className={`
           min-h-full flex flex-col justify-center
-          px-5 py-6 md:px-12 md:py-10
-        ">
+          px-5 py-6 md:px-12
+          ${isQuestionStep ? 'md:justify-start md:pt-[22vh]' : 'md:py-10'}
+        `}>
           {right}
         </div>
       </div>
