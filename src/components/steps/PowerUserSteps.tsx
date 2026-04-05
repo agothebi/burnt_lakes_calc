@@ -35,8 +35,14 @@ const TOKEN_PRESET_OPTIONS = [
   { value: 25_000_000,  label: '10M+ / mo' },
 ]
 
-const MONTH_LABELS: Record<number, string> = {
-  1: 'Just started', 6: '6 months', 12: '1 year', 24: '2 years', 36: '3+ years',
+function formatMonths(v: number): string {
+  if (v === 1) return 'Just started'
+  if (v === 36) return '3+ years'
+  if (v < 12) return `${v} months`
+  const years = Math.floor(v / 12)
+  const rem = v % 12
+  if (rem === 0) return years === 1 ? '1 year' : `${years} years`
+  return `${years}y ${rem}m`
 }
 
 const slideVariants = {
@@ -163,7 +169,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
           min={1} max={36} value={months}
           onChange={v => { setMonths(v); wizard.setAnswers({ monthsActive: v }) }}
           color="yellow"
-          formatLabel={v => MONTH_LABELS[v] ?? `${v} months`}
+          formatLabel={formatMonths}
           minLabel="1 month"
           maxLabel="3+ years"
         />
@@ -235,7 +241,7 @@ export function PowerUserSteps({ wizard }: { wizard: WizardControls }) {
           min={1} max={36} value={months}
           onChange={v => { setMonths(v); wizard.setAnswers({ monthsActive: v }) }}
           color="lime"
-          formatLabel={v => MONTH_LABELS[v] ?? `${v} months`}
+          formatLabel={formatMonths}
           minLabel="1 month"
           maxLabel="3+ years"
         />

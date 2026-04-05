@@ -46,9 +46,14 @@ const STYLE_OPTIONS: { value: ConversationStyle; label: string }[] = [
   { value: 'debate',    label: 'Full rabbit hole, lose track of time' },
 ]
 
-const MONTH_LABELS: Record<number, string> = {
-  1: 'Just started', 6: '6 months', 12: '1 year',
-  24: '2 years', 36: '3+ years',
+function formatMonths(v: number): string {
+  if (v === 1) return 'Just started'
+  if (v === 36) return '3+ years'
+  if (v < 12) return `${v} months`
+  const years = Math.floor(v / 12)
+  const rem = v % 12
+  if (rem === 0) return years === 1 ? '1 year' : `${years} years`
+  return `${years}y ${rem}m`
 }
 
 const slideVariants = {
@@ -169,7 +174,7 @@ export function RegularUserSteps({ wizard }: { wizard: WizardControls }) {
           value={months}
           onChange={v => { setMonths(v); wizard.setAnswers({ monthsActive: v }) }}
           color="coral"
-          formatLabel={v => MONTH_LABELS[v] ?? `${v} months`}
+          formatLabel={formatMonths}
           minLabel="1 month"
           maxLabel="3+ years"
         />
