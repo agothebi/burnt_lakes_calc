@@ -114,6 +114,7 @@ function buildInfoLines(answers: WizardControls['answers'], totalLiters: number)
   }
   lines.push(`Duration:          ${answers.monthsActive ?? 6} months`)
   lines.push(`Total water:       ~${Math.round(totalLiters).toLocaleString()} liters`)
+  lines.push(`1 lake =           50,000 liters (a small natural lake)`)
   lines.push(`Source: Li et al. 2023 (UC Riverside) — arxiv.org/abs/2304.03271`)
   return lines
 }
@@ -122,6 +123,7 @@ function buildInfoLines(answers: WizardControls['answers'], totalLiters: number)
 export function ResultStep({ wizard }: { wizard: WizardControls }) {
   const confettiFired = useRef(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [copied, setCopied] = useState(false)
   const totalLiters = computeResult(wizard.answers)
   const result = formatResult(totalLiters)
   const infoLines = buildInfoLines(wizard.answers, totalLiters)
@@ -147,7 +149,10 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
   const shareText = buildShareText(totalLiters, result.lakes)
 
   function handleShare() {
-    navigator.clipboard.writeText(shareText).catch(() => {})
+    navigator.clipboard.writeText(shareText).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
   }
 
   return (
@@ -273,7 +278,7 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         transition={{ delay: 0.7 }}
       >
         <ClayButton color="coral" onClick={handleShare} fullWidth>
-          Share this tragedy
+          {copied ? 'Copied to clipboard!' : 'Share this tragedy'}
         </ClayButton>
         <ClayButton color="cream" onClick={wizard.reset} fullWidth>
           Try again (different answers won't help)
