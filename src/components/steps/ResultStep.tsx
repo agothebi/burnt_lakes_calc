@@ -270,6 +270,9 @@ export function ResultStep({ wizard }: { wizard: WizardControls }) {
         ))}
       </motion.div>
 
+      {/* Mobile-only divider above actions */}
+      <div className="md:hidden border-t border-[#1A1A2E]/10" />
+
       {/* Actions */}
       <motion.div
         className="flex flex-col sm:flex-row gap-3"
