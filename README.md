@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# Burned Lakes Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A multi-step web calculator that converts your AI/LLM usage into lakes of evaporated water, backed by real data center research and a progressively scorched SVG landscape.
 
-Currently, two official plugins are available:
+## The premise
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Data centers use water to cool servers. A lot of it. [Li et al. (2023)](https://arxiv.org/abs/2304.03271) estimated meaningful per-inference water costs that compound fast at scale. This calculator takes your actual usage habits, runs them through tiered water consumption constants, and tells you how many lakes you have personally evaporated.
 
-## React Compiler
+One lake is defined as 200,000 liters.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## How the math works
 
-## Expanding the ESLint configuration
+**Regular users:** frequency x session length x conversation depth x model tier x months
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Power users (token path):** monthly tokens x mL-per-1K-tokens x output ratio multiplier x months
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Power users (call path):** calls/day x estimated tokens/call, then into the token path
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Water constants by model tier (mL per 1,000 tokens):
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Tier | Example models | mL / 1K tokens |
+|---|---|---|
+| Small | Claude Haiku, Gemini Flash-Lite, GPT-4o mini | 1.0 |
+| Mid | Claude Sonnet, Gemini Flash, GPT-4o | 2.5 |
+| Frontier | Claude Opus, Gemini Pro, GPT-4.5 | 6.0 |
+
+Output tokens are weighted roughly 4x heavier than input tokens, since generating text is significantly more compute-intensive than processing a prompt.
+
+Sources: [Li et al. 2023, "Making AI Less Thirsty"](https://arxiv.org/abs/2304.03271) and Microsoft water usage disclosures (2022-2023).
+
+## What it asks you
+
+Two paths through the wizard:
+
+**Casual users** answer questions about how often they use AI, how long sessions run, which tools they use, and how deep they typically go in a conversation.
+
+**Power users** choose between a token path (monthly token volume, output ratio, model tier) or a call path (calls per day, messages per call, model tier).
+
+Both paths end with a slider for how long you have been at this usage level, which turns out to be the most impactful variable.
+
+## The lake scale
+
+| Range | Verdict |
+|---|---|
+| < 0.005 lakes | Barely a splash. For now. |
+| 0.005 - 0.02 | The fish have noticed. |
+| 0.02 - 0.1 | The waterline is measurably lower. |
+| 0.1 - 0.5 | A meaningful chunk of a lake, gone. |
+| 0.5 - 1 | Almost a whole lake. Almost. |
+| 1 - 2 | One whole lake. The ducks are furious. |
+| 2 - 5 | Multiple lakes. The ducks have filed a complaint. |
+| 5 - 20 | A regional aquatic incident. |
+| 20 - 100 | You are the drought. |
+| 100+ | Scientists are naming the dry basin after you. |
+
+## Running it locally
+
+```bash
+npm install
+npm run dev     # http://localhost:5173
+npm test
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Requires Node 18+.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+React 19, TypeScript, Vite, Framer Motion (the lake scene burns in real time as you fill out the wizard), Tailwind v4, Vitest.
